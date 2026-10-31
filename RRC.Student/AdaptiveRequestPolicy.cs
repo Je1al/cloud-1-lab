@@ -10,10 +10,10 @@ public sealed class AdaptiveRequestPolicy : IRequestPolicy
 {
     // A generous initial value is deliberate: a timeout cannot cancel server
     // work, so an early retry would create duplicate work during warm-up.
-    private TimeSpan currentTimeout = TimeSpan.FromSeconds(2);
+    private TimeSpan currentTimeout = TimeSpan.FromSeconds(1);
     private TimeSpan longestSuccessfulAttempt = TimeSpan.Zero;
 
-    private static readonly TimeSpan MaximumTimeout = TimeSpan.FromSeconds(12);
+    private static readonly TimeSpan MaximumTimeout = TimeSpan.FromSeconds(60);
 
     public TimeSpan GetTimeout(RequestContext context, Random random) => currentTimeout;
 
@@ -38,7 +38,7 @@ public sealed class AdaptiveRequestPolicy : IRequestPolicy
         // New requests may encounter the same congestion. Increase the
         // deadline promptly, rather than adding a duplicate attempt while the
         // timed-out one is still executing on the server.
-        currentTimeout = Min(Multiply(currentTimeout, 3m / 2m), MaximumTimeout);
+        currentTimeout = Min(Multiply(currentTimeout, 2m), MaximumTimeout);
         return RetryDecision.NoRetry();
     }
 
